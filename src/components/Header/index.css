@@ -1,0 +1,51 @@
+.home-btn-mobile,
+.logout-btn-mobile {
+  display: none;
+}
+
+@media screen and (max-width: 567px) {
+  .header-button,
+  .logout-btn {
+    display: none;
+  }
+
+  .home-btn-mobile {
+    display: flex;
+  }
+
+  .logout-btn-mobile {
+    display: flex;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+  }
+  .logout-icon {
+    height: 30px;
+    width: 40px;
+    font-size: 50px;
+    border: none;
+    cursor: pointer;
+    color: #ffffff;
+  }
+  .header-container {
+    padding: 10px;
+  }
+
+  .header-website-logo {
+    height: 40px;
+    width: 70%;
+  }
+}
+
+.moon {
+  width: 46px;
+  height: 35px;
+  margin: 5px;
+}
+
+.lightTheme {
+  width: 46px;
+  color: #ffff;
+  height: 35px;
+  margin: 5px;
+}
