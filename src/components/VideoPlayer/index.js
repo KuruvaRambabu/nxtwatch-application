@@ -1,13 +1,17 @@
 import ReactPlayer from 'react-player'
 
 import './index.css'
-import {VideoContainer, VideoHeading} from './styledComponents'
+import {
+  VideoContainer,
+  VideoHeading,
+  VideoPlayerContainer,
+} from './styledComponents'
 
 const VideoPlayer = props => {
   const {url, title} = props
   return (
     <VideoContainer className="video-container">
-      <div className="responsive-container">
+      <VideoPlayerContainer className="responsive-container">
         <ReactPlayer
           width="98%"
           height="55vh"
@@ -15,7 +19,7 @@ const VideoPlayer = props => {
           playing={false}
           controls
         />
-      </div>
+      </VideoPlayerContainer>
       <VideoHeading>{title}</VideoHeading>
     </VideoContainer>
   )

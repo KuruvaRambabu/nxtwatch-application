@@ -1,12 +1,17 @@
-import {Component} from 'react'
+import {useState, useEffect, useContext} from 'react'
+import {useParams} from 'react-router-dom'
 import Cookies from 'js-cookie'
-
 import {AiOutlineLike, AiOutlineDislike} from 'react-icons/ai'
 import {CgPlayListAdd} from 'react-icons/cg'
-
 import {formatDistanceToNowStrict} from 'date-fns'
 
 import withHeader from '../Hocs/withHeader'
+import SideBar from '../SideBar'
+import VideoPlayer from '../VideoPlayer'
+import apiConstants from '../../constants/apiConstants'
+import LoadingView from '../LoadingView'
+import ThemeContext from '../Context/ThemeContext'
+
 import {
   SideBarMainContainer,
   NxtWatchRightSideSection,
@@ -26,27 +31,22 @@ import {
   Subscribers,
   VideoDescription,
 } from './styledComponents'
-import SideBar from '../SideBar'
-import VideoPlayer from '../VideoPlayer'
-import apiConstants from '../../constants/apiConstants'
-import LoadingView from '../LoadingView'
 import './index.css'
-import ThemeContext from '../Context/ThemeContext'
 
-class WatchVideo extends Component {
-  state = {
+const WatchVideo = () => {
+  const [isSavedVideo, updateSavedVideoStatus] = useState(false)
+  const [isLikedVideo, updateIsLikedVideo] = useState(false)
+  const [isUnlikedVideo, updateIsUnlikedVideo] = useState(false)
+  const [videoDetailsApiResponse, updateVideoDetailsApiResponse] = useState({
     apiStatus: apiConstants.initial,
     videoDetails: {},
-    isSavedVideo: false,
-    isLikedVideo: false,
-    isUnlikedVideo: false,
-  }
+  })
 
-  componentDidMount() {
-    this.getVideoDetailsAPI()
-  }
+  const themeContext = useContext(ThemeContext)
+  const {isDarkTheme, onClickSaveVideo} = themeContext
 
-  onVideoDetailsAPISuccess = data => {
+  const videoId = useParams()
+  const onVideoDetailsAPISuccess = data => {
     const videoDetails = data.video_details
     console.log(videoDetails)
     const formattedVideoDetails = {
@@ -63,22 +63,26 @@ class WatchVideo extends Component {
       videoUrl: videoDetails.video_url,
       viewCount: videoDetails.view_count,
     }
-    this.setState({
+    updateVideoDetailsApiResponse({
       videoDetails: formattedVideoDetails,
       apiStatus: apiConstants.success,
     })
   }
 
-  onVideoDetailsAPIFailure = () => {
-    this.setState({apiStatus: apiConstants.failure})
+  const onVideoDetailsAPIFailure = () => {
+    updateVideoDetailsApiResponse(prevState => ({
+      ...prevState,
+      apiStatus: apiConstants.failure,
+    }))
   }
 
-  getVideoDetailsAPI = async () => {
-    const {match} = this.props
-    const {params} = match
-    const {id} = params
+  const getVideoDetailsAPI = async () => {
+    const {id} = videoId
 
-    this.setState({apiStatus: apiConstants.inProgress})
+    updateVideoDetailsApiResponse(prevState => ({
+      ...prevState,
+      apiStatus: apiConstants.inProgress,
+    }))
 
     const url = `https://apis.ccbp.in/videos/${id}`
     const jwtToken = Cookies.get('jwt_token')
@@ -93,53 +97,44 @@ class WatchVideo extends Component {
     const data = await response.json()
 
     if (response.ok === true) {
-      this.onVideoDetailsAPISuccess(data)
+      onVideoDetailsAPISuccess(data)
     } else {
-      this.onVideoDetailsAPIFailure()
+      onVideoDetailsAPIFailure()
     }
   }
 
-  renderVideoAPILoadingView = () => <LoadingView />
+  useEffect(() => {
+    getVideoDetailsAPI()
+  }, [])
 
-  togglelike = () => {
-    const {isUnlikedVideo} = this.state
+  const renderVideoAPILoadingView = () => <LoadingView />
+
+  const togglelike = () => {
     if (isUnlikedVideo) {
-      this.setState(prevState => ({
-        isUnlikedVideo: false,
-        isLikedVideo: !prevState.isLikedVideo,
-      }))
+      updateIsLikedVideo(prevState => !prevState)
+      updateIsUnlikedVideo(prevState => !prevState)
     } else {
-      this.setState(prevState => ({
-        isLikedVideo: !prevState.isLikedVideo,
-      }))
+      updateIsLikedVideo(prevState => !prevState)
     }
   }
 
-  toggleDislike = () => {
-    const {isLikedVideo} = this.state
+  const toggleDislike = () => {
     if (isLikedVideo) {
-      this.setState(prevState => ({
-        isLikedVideo: false,
-        isUnlikedVideo: !prevState.isUnlikedVideo,
-      }))
+      updateIsLikedVideo(prevState => !prevState)
+      updateIsUnlikedVideo(prevState => !prevState)
     } else {
-      this.setState(prevState => ({
-        isUnlikedVideo: !prevState.isUnlikedVideo,
-      }))
+      updateIsUnlikedVideo(prevState => !prevState)
     }
   }
 
-  addVideoToSavedList = () => {
-    this.setState(prevState => ({isSavedVideo: !prevState.isSavedVideo}))
+  const addVideoToSavedList = () => {
+    const {videoDetails} = videoDetailsApiResponse
+    onClickSaveVideo(videoDetails)
+    updateSavedVideoStatus(prevState => !prevState)
   }
 
-  renderVideoAPISuccessView = () => {
-    const {
-      videoDetails,
-      isLikedVideo,
-      isUnlikedVideo,
-      isSavedVideo,
-    } = this.state
+  const renderVideoAPISuccessView = () => {
+    const {videoDetails} = videoDetailsApiResponse
     const {
       videoUrl,
       title,
@@ -152,104 +147,82 @@ class WatchVideo extends Component {
     const formattedDistance = formatDistanceToNowStrict(new Date(publishedAt))
 
     return (
-      <ThemeContext.Consumer>
-        {value => {
-          const {onClickSaveVideo} = value
-          const onClickSave = () => {
-            onClickSaveVideo(videoDetails)
-            this.addVideoToSavedList()
-          }
-
-          return (
-            <VideoPlayerContainer>
-              <VideoPlayer url={videoUrl} title={title} />
-              <LikesAndViewsContainer>
-                <ViewsAndPublishedAtContainer>
-                  <ViewsCount>{viewCount}</ViewsCount>
-                  <PublishedAt>{formattedDistance} ago</PublishedAt>
-                </ViewsAndPublishedAtContainer>
-                <LikesAndSaveVideoContainer>
-                  <CustomVideoPlayerBtn
-                    onClick={this.togglelike}
-                    color={isLikedVideo}
-                    type="button"
-                  >
-                    <AiOutlineLike className="like-icon" />
-                    Like
-                  </CustomVideoPlayerBtn>
-                  <CustomVideoPlayerBtn
-                    onClick={this.toggleDislike}
-                    color={isUnlikedVideo}
-                    type="button"
-                  >
-                    <AiOutlineDislike className="like-icon" /> Dislike
-                  </CustomVideoPlayerBtn>
-                  <CustomVideoPlayerBtn
-                    onClick={onClickSave}
-                    color={isSavedVideo}
-                    type="button"
-                  >
-                    <CgPlayListAdd className="save-icon" />
-                    {isSavedVideo ? 'Saved' : 'Save'}
-                  </CustomVideoPlayerBtn>
-                </LikesAndSaveVideoContainer>
-              </LikesAndViewsContainer>
-              <HorizontalLine />
-              <ChannelsDetailsContainer>
-                <ChannelLogo src={profileImgUrl} alt="channle logo" />
-                <ChannelHeadingAndSubscribersContainer>
-                  <ChannelName>{name}</ChannelName>
-                  <Subscribers>{subscriberCount} subscribers</Subscribers>
-                  <VideoDescription>{description}</VideoDescription>
-                </ChannelHeadingAndSubscribersContainer>
-              </ChannelsDetailsContainer>
-            </VideoPlayerContainer>
-          )
-        }}
-      </ThemeContext.Consumer>
+      <VideoPlayerContainer>
+        <VideoPlayer url={videoUrl} title={title} />
+        <LikesAndViewsContainer>
+          <ViewsAndPublishedAtContainer>
+            <ViewsCount>{viewCount}</ViewsCount>
+            <PublishedAt>{formattedDistance} ago</PublishedAt>
+          </ViewsAndPublishedAtContainer>
+          <LikesAndSaveVideoContainer>
+            <CustomVideoPlayerBtn
+              onClick={togglelike}
+              color={isLikedVideo}
+              type="button"
+            >
+              <AiOutlineLike className="like-icon" />
+              Like
+            </CustomVideoPlayerBtn>
+            <CustomVideoPlayerBtn
+              onClick={toggleDislike}
+              color={isUnlikedVideo}
+              type="button"
+            >
+              <AiOutlineDislike className="like-icon" /> Dislike
+            </CustomVideoPlayerBtn>
+            <CustomVideoPlayerBtn
+              onClick={addVideoToSavedList}
+              color={isSavedVideo}
+              type="button"
+            >
+              <CgPlayListAdd className="save-icon" />
+              {isSavedVideo ? 'Saved' : 'Save'}
+            </CustomVideoPlayerBtn>
+          </LikesAndSaveVideoContainer>
+        </LikesAndViewsContainer>
+        <HorizontalLine />
+        <ChannelsDetailsContainer>
+          <ChannelLogo src={profileImgUrl} alt="channle logo" />
+          <ChannelHeadingAndSubscribersContainer>
+            <ChannelName>{name}</ChannelName>
+            <Subscribers>{subscriberCount} subscribers</Subscribers>
+            <VideoDescription>{description}</VideoDescription>
+          </ChannelHeadingAndSubscribersContainer>
+        </ChannelsDetailsContainer>
+      </VideoPlayerContainer>
     )
   }
 
-  renderVideoAPIFailureView = () => {}
+  const renderVideoAPIFailureView = () => {}
 
-  renderVideoPlayer = () => {
-    const {apiStatus} = this.state
+  const renderVideoPlayer = () => {
+    const {apiStatus} = videoDetailsApiResponse
 
     switch (apiStatus) {
       case apiConstants.inProgress:
-        return this.renderVideoAPILoadingView()
+        return renderVideoAPILoadingView()
       case apiConstants.success:
-        return this.renderVideoAPISuccessView()
+        return renderVideoAPISuccessView()
       case apiConstants.failure:
-        return this.renderVideoAPIFailureView()
+        return renderVideoAPIFailureView()
       default:
         return ''
     }
   }
 
-  render() {
-    return (
-      <ThemeContext.Consumer>
-        {value => {
-          const {isDarkTheme} = value
-
-          return (
-            <WatchVideoMainContainer
-              isDarkTheme={isDarkTheme}
-              data-testid="videoItemDetails"
-            >
-              <SideBarMainContainer isDarkTheme={isDarkTheme}>
-                <SideBar />
-              </SideBarMainContainer>
-              <NxtWatchRightSideSection isDarkTheme={isDarkTheme}>
-                {this.renderVideoPlayer()}
-              </NxtWatchRightSideSection>
-            </WatchVideoMainContainer>
-          )
-        }}
-      </ThemeContext.Consumer>
-    )
-  }
+  return (
+    <WatchVideoMainContainer
+      isDarkTheme={isDarkTheme}
+      data-testid="videoItemDetails"
+    >
+      <SideBarMainContainer isDarkTheme={isDarkTheme}>
+        <SideBar />
+      </SideBarMainContainer>
+      <NxtWatchRightSideSection isDarkTheme={isDarkTheme}>
+        {renderVideoPlayer()}
+      </NxtWatchRightSideSection>
+    </WatchVideoMainContainer>
+  )
 }
 
 export default withHeader(WatchVideo)

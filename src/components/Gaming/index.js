@@ -1,58 +1,61 @@
-import {Component} from 'react'
+import {useEffect, useState, useContext} from 'react'
 import Cookies from 'js-cookie'
 import {GiGamepad} from 'react-icons/gi'
+
+import apiConstants from '../../constants/apiConstants'
+
+import withHeader from '../Hocs/withHeader'
+import SideBar from '../SideBar'
+import LoadingView from '../LoadingView'
+import FailureView from '../FailureView'
+import GamingVideoCard from '../GamingVideoCard'
+import ThemeContext from '../Context/ThemeContext'
 
 import {
   GamingMainContainer,
   NxtWatchRightSideSection,
   SideBarMainContainer,
-  GamingVidoesUIMainContainer,
+  GamingVideosUiMainContainer,
   GamingVideosHeadingContainer,
   GamingVideoIconContainer,
   GamingVideoHeading,
   GamingVideoDisplayContainer,
 } from './styledComponents'
 
-import withHeader from '../Hocs/withHeader'
-import SideBar from '../SideBar'
-import apiConstants from '../../constants/apiConstants'
-import LoadingView from '../LoadingView'
-import FailureView from '../FailureView'
-import GamingVideoCard from '../GamingVideoCard'
-import ThemeContext from '../Context/ThemeContext'
-
-class Gaming extends Component {
-  state = {
+const Gaming = () => {
+  const [gamingVideoApiResponse, updateGamingVideosAPIResponse] = useState({
     gamingVideosList: [],
     apiStatus: apiConstants.initial,
-  }
+  })
+  const themeContext = useContext(ThemeContext)
+  const {isDarkTheme} = themeContext
 
-  componentDidMount() {
-    this.getGamingVidoesAPI()
-  }
-
-  onGamingAPISuccess = data => {
+  const onGamingAPISuccess = data => {
     const {videos} = data
-    console.log(videos)
     const formattedVideosData = videos.map(video => ({
       id: video.id,
       title: video.title,
       thumbnailUrl: video.thumbnail_url,
       viewCount: video.view_count,
     }))
-    console.log(formattedVideosData)
-    this.setState({
+    updateGamingVideosAPIResponse({
       apiStatus: apiConstants.success,
       gamingVideosList: formattedVideosData,
     })
   }
 
-  onGamingAPIFailure = () => {
-    this.setState({apiStatus: apiConstants.failure})
+  const onGamingAPIFailure = () => {
+    updateGamingVideosAPIResponse(prevState => ({
+      ...prevState,
+      apiStatus: apiConstants.failure,
+    }))
   }
 
-  getGamingVidoesAPI = async () => {
-    this.setState({apiStatus: apiConstants.inProgress})
+  const getGamingVidoesAPI = async () => {
+    updateGamingVideosAPIResponse(prevState => ({
+      ...prevState,
+      apiStatus: apiConstants.inProgress,
+    }))
     const url = 'https://apis.ccbp.in/videos/gaming'
     const jwtToken = Cookies.get('jwt_token')
     const options = {
@@ -66,82 +69,70 @@ class Gaming extends Component {
     const data = await response.json()
 
     if (response.ok === true) {
-      this.onGamingAPISuccess(data)
+      onGamingAPISuccess(data)
     } else {
-      this.onGamingAPIFailure()
+      onGamingAPIFailure()
     }
   }
 
-  renderGamingVideosAPISuccess = () => {
-    const {gamingVideosList} = this.state
+  useEffect(() => {
+    getGamingVidoesAPI()
+  }, [])
+
+  const renderGamingVideosAPISuccess = () => {
+    const {gamingVideosList} = gamingVideoApiResponse
 
     return (
-      <ThemeContext.Consumer>
-        {value => {
-          const {isDarkTheme} = value
-          return (
-            <GamingVidoesUIMainContainer isDarkTheme={isDarkTheme}>
-              <GamingVideosHeadingContainer isDarkTheme={isDarkTheme}>
-                <GamingVideoIconContainer isDarkTheme={isDarkTheme}>
-                  <GiGamepad className="trending-icon" />
-                </GamingVideoIconContainer>
-                <GamingVideoHeading>Gaming</GamingVideoHeading>
-              </GamingVideosHeadingContainer>
-              <GamingVideoDisplayContainer>
-                {gamingVideosList.map(video => (
-                  <GamingVideoCard gameVideo={video} key={video.id} />
-                ))}
-              </GamingVideoDisplayContainer>
-            </GamingVidoesUIMainContainer>
-          )
-        }}
-      </ThemeContext.Consumer>
+      <GamingVideosUiMainContainer isDarkTheme={isDarkTheme}>
+        <GamingVideosHeadingContainer isDarkTheme={isDarkTheme}>
+          <GamingVideoIconContainer isDarkTheme={isDarkTheme}>
+            <GiGamepad className="trending-icon" />
+          </GamingVideoIconContainer>
+          <GamingVideoHeading>Gaming</GamingVideoHeading>
+        </GamingVideosHeadingContainer>
+        <GamingVideoDisplayContainer>
+          {gamingVideosList.map(video => (
+            <GamingVideoCard gameVideo={video} key={video.id} />
+          ))}
+        </GamingVideoDisplayContainer>
+      </GamingVideosUiMainContainer>
     )
   }
 
-  renderGamingVideosUI = () => {
-    const {apiStatus} = this.state
+  const renderGamingVideoFailureView = () => (
+    <FailureView
+      failureImg="https://assets.ccbp.in/frontend/react-js/nxt-watch-failure-view-light-theme-img.png"
+      getVideosAPI={getGamingVidoesAPI}
+    />
+  )
+
+  const renderGamingLoadingView = () => <LoadingView />
+
+  const renderGamingVideosUI = () => {
+    const {apiStatus} = gamingVideoApiResponse
 
     switch (apiStatus) {
       case apiConstants.inProgress:
-        return <LoadingView />
+        return renderGamingLoadingView()
       case apiConstants.success:
-        return this.renderGamingVideosAPISuccess()
+        return renderGamingVideosAPISuccess()
       case apiConstants.failure:
-        return (
-          <FailureView
-            failureImg="https://assets.ccbp.in/frontend/react-js/nxt-watch-failure-view-light-theme-img.png"
-            getVideosAPI={this.getGamingVidoesAPI}
-          />
-        )
-
+        return renderGamingVideoFailureView()
       default:
         return ''
     }
   }
 
-  render() {
-    return (
-      <ThemeContext.Consumer>
-        {value => {
-          const {isDarkTheme} = value
-          return (
-            <GamingMainContainer
-              data-test-id="gaming"
-              isDarkTheme={isDarkTheme}
-            >
-              <SideBarMainContainer isDarkTheme={isDarkTheme}>
-                <SideBar />
-              </SideBarMainContainer>
-              <NxtWatchRightSideSection>
-                {this.renderGamingVideosUI()}
-              </NxtWatchRightSideSection>
-            </GamingMainContainer>
-          )
-        }}
-      </ThemeContext.Consumer>
-    )
-  }
+  return (
+    <GamingMainContainer data-test-id="gaming" isDarkTheme={isDarkTheme}>
+      <SideBarMainContainer isDarkTheme={isDarkTheme}>
+        <SideBar />
+      </SideBarMainContainer>
+      <NxtWatchRightSideSection>
+        {renderGamingVideosUI()}
+      </NxtWatchRightSideSection>
+    </GamingMainContainer>
+  )
 }
 
 export default withHeader(Gaming)

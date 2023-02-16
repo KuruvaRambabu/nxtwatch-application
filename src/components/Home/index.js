@@ -1,8 +1,18 @@
-import {Component} from 'react'
+import {useState, useEffect, useContext} from 'react'
 import Cookies from 'js-cookie'
 import {BsSearch} from 'react-icons/bs'
 
-import './index.css'
+import apiConstants from '../../constants/apiConstants'
+
+import withHeader from '../Hocs/withHeader'
+import SideBar from '../SideBar'
+import NxtWatchPremium from '../NxtWatchPremium'
+import VideoCard from '../VideoCard'
+import ThemeContext from '../Context/ThemeContext'
+import FailureView from '../FailureView'
+import LoadingView from '../LoadingView'
+import NoVideosFound from '../NoVideosFound'
+
 import {
   HomeMainContainer,
   NxtWatchRightSideSection,
@@ -14,30 +24,19 @@ import {
   SearchIconBtn,
   VideosContainer,
 } from './styledComponents'
+import './index.css'
 
-import withHeader from '../Hocs/withHeader'
-import SideBar from '../SideBar'
-import NxtWatchPremium from '../NxtWatchPremium'
-import apiConstants from '../../constants/apiConstants'
-import VideoCard from '../VideoCard'
-import ThemeContext from '../Context/ThemeContext'
-import FailureView from '../FailureView'
-import LoadingView from '../LoadingView'
-import NoVideosFound from '../NoVideosFound'
-
-class Home extends Component {
-  state = {
-    showPremiumBuyBanner: true,
-    searchValue: '',
+const Home = () => {
+  const [showPremiumBuyBanner, updatePremiumBannerViewStatus] = useState(true)
+  const [searchValue, setSearchvalue] = useState('')
+  const [videosApiResponse, updateVideosApiResponse] = useState({
     videosList: [],
     apiStatus: apiConstants.initial,
-  }
+  })
+  const themeContext = useContext(ThemeContext)
+  const {isDarkTheme} = themeContext
 
-  componentDidMount() {
-    this.getVideosAPI()
-  }
-
-  onVideosAPISuccess = data => {
+  const onVideosAPISuccess = data => {
     const {videos} = data
     const formattedVideosData = videos.map(video => ({
       id: video.id,
@@ -50,20 +49,24 @@ class Home extends Component {
       viewCount: video.view_count,
       publishedAt: video.published_at,
     }))
-    console.log(formattedVideosData)
-    this.setState({
+    updateVideosApiResponse({
       apiStatus: apiConstants.success,
       videosList: formattedVideosData,
     })
   }
 
-  onVideosAPIFailure = () => {
-    this.setState({apiStatus: apiConstants.failure})
+  const onVideosAPIFailure = () => {
+    updateVideosApiResponse(prevResponse => ({
+      ...prevResponse,
+      apiStatus: apiConstants.failure,
+    }))
   }
 
-  getVideosAPI = async () => {
-    const {searchValue} = this.state
-    this.setState({apiStatus: apiConstants.inProgress})
+  const getVideosAPI = async () => {
+    updateVideosApiResponse(prevResponse => ({
+      ...prevResponse,
+      apiStatus: apiConstants.inProgress,
+    }))
 
     const url = `https://apis.ccbp.in/videos/all?search=${searchValue}`
     const jwtToken = Cookies.get('jwt_token')
@@ -78,24 +81,28 @@ class Home extends Component {
     const data = await response.json()
 
     if (response.ok === true) {
-      this.onVideosAPISuccess(data)
+      onVideosAPISuccess(data)
     } else {
-      this.onVideosAPIFailure()
+      onVideosAPIFailure()
     }
   }
 
-  OnClosePremiumBuyBanner = () => {
-    this.setState({showPremiumBuyBanner: false})
+  useEffect(() => {
+    getVideosAPI()
+  }, [searchValue])
+
+  const OnClosePremiumBuyBanner = () => {
+    updatePremiumBannerViewStatus(false)
   }
 
-  onChangeSearchInput = event => {
-    this.setState({searchValue: event.target.value}, this.getVideosAPI)
+  const onChangeSearchInput = event => {
+    setSearchvalue(event.target.value)
   }
 
-  renderVideosAPILoadingView = () => <LoadingView />
+  const renderVideosAPILoadingView = () => <LoadingView />
 
-  renderVideosAPISuccess = () => {
-    const {videosList} = this.state
+  const renderVideosAPISuccess = () => {
+    const {videosList} = videosApiResponse
     if (videosList.length > 0) {
       return (
         <VideosContainer>
@@ -105,85 +112,68 @@ class Home extends Component {
         </VideosContainer>
       )
     }
-    return <NoVideosFound getVideosAPI={this.getVideosAPI} />
+    return <NoVideosFound getVideosAPI={getVideosAPI} />
   }
 
-  renderVideosAPIFailureView = () => (
+  const renderVideosAPIFailureView = () => (
     <FailureView
       failureImg="https://assets.ccbp.in/frontend/react-js/nxt-watch-failure-view-light-theme-img.png"
       alt="failure view"
-      getVideosAPI={this.getVideosAPI}
+      getVideosAPI={getVideosAPI}
     />
   )
 
-  renderVideosUI = () => {
-    const {apiStatus} = this.state
+  const renderVideosUI = () => {
+    const {apiStatus} = videosApiResponse
 
     switch (apiStatus) {
       case apiConstants.inProgress:
-        return this.renderVideosAPILoadingView()
+        return renderVideosAPILoadingView()
       case apiConstants.success:
-        return this.renderVideosAPISuccess()
+        return renderVideosAPISuccess()
       case apiConstants.failure:
-        return this.renderVideosAPIFailureView()
-
+        return renderVideosAPIFailureView()
       default:
         return ''
     }
   }
 
-  renderSearchVideoField = () => {
-    const {searchValue} = this.state
-    return (
-      <SearchContainer>
-        <SearchInputAndIconContainer>
-          <InputSearchField
-            type="search"
-            placeholder="Search"
-            value={searchValue}
-            onChange={this.onChangeSearchInput}
-          />
-          <SearchIconBtn
-            onClick={this.onClickSearchButton}
-            className="search-icon-btn"
-            type="button"
-            data-testid="searchButton"
-          >
-            <BsSearch className="search-icon" />
-          </SearchIconBtn>
-        </SearchInputAndIconContainer>
-      </SearchContainer>
-    )
-  }
+  const renderSearchVideoField = () => (
+    <SearchContainer>
+      <SearchInputAndIconContainer>
+        <InputSearchField
+          type="search"
+          placeholder="Search"
+          value={searchValue}
+          onChange={onChangeSearchInput}
+        />
+        <SearchIconBtn
+          className="search-icon-btn"
+          type="button"
+          data-testid="searchButton"
+        >
+          <BsSearch className="search-icon" />
+        </SearchIconBtn>
+      </SearchInputAndIconContainer>
+    </SearchContainer>
+  )
 
-  render() {
-    const {showPremiumBuyBanner} = this.state
-    return (
-      <ThemeContext.Consumer>
-        {value => {
-          const {isDarkTheme} = value
-          return (
-            <HomeMainContainer data-testid="home" isDarkTheme={isDarkTheme}>
-              <SideBarMainContainer isDarkTheme={isDarkTheme}>
-                <SideBar />
-              </SideBarMainContainer>
-              <NxtWatchRightSideSection>
-                {showPremiumBuyBanner && (
-                  <NxtWatchPremium
-                    OnClosePremiumBuyBanner={this.OnClosePremiumBuyBanner}
-                  />
-                )}
-                <NxtWatchVideosMainContainer isDarkTheme={isDarkTheme}>
-                  {this.renderSearchVideoField()}
-                  {this.renderVideosUI()}
-                </NxtWatchVideosMainContainer>
-              </NxtWatchRightSideSection>
-            </HomeMainContainer>
-          )
-        }}
-      </ThemeContext.Consumer>
-    )
-  }
+  return (
+    <HomeMainContainer data-testid="home" isDarkTheme={isDarkTheme}>
+      <SideBarMainContainer isDarkTheme={isDarkTheme}>
+        <SideBar />
+      </SideBarMainContainer>
+      <NxtWatchRightSideSection>
+        {showPremiumBuyBanner && (
+          <NxtWatchPremium OnClosePremiumBuyBanner={OnClosePremiumBuyBanner} />
+        )}
+        <NxtWatchVideosMainContainer isDarkTheme={isDarkTheme}>
+          {renderSearchVideoField()}
+          {renderVideosUI()}
+        </NxtWatchVideosMainContainer>
+      </NxtWatchRightSideSection>
+    </HomeMainContainer>
+  )
 }
 
 export default withHeader(Home)

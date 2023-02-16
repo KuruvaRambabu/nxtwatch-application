@@ -1,8 +1,10 @@
-import React from 'react'
+import {createContext} from 'react'
 
-const ThemeContext = React.createContext({
+const ThemeContext = createContext({
   isDarkTheme: false,
   onChangeTheme: () => {},
+  savedVideos: [],
+  onClickSaveVideo: () => {},
 })
 
 export default ThemeContext

@@ -31,7 +31,7 @@ export const NxtWatchRightSideSection = styled.div`
   min-height: 90vh;
 `
 
-export const GamingVidoesUIMainContainer = styled(TrendingVideoContaianer)``
+export const GamingVideosUiMainContainer = styled(TrendingVideoContaianer)``
 
 export const GamingVideosHeadingContainer = styled(
   TrendingVideosHeadingContainer,

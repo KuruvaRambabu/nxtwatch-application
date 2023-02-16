@@ -1,4 +1,8 @@
 import withHeader from '../Hocs/withHeader'
+
+import SideBar from '../SideBar'
+import ThemeContext from '../Context/ThemeContext'
+
 import {
   NotFoundMainContainer,
   SideBarMainContainer,
@@ -7,8 +11,6 @@ import {
   NotFoundHeading,
   NotFoundDescription,
 } from './styledComponents'
-import SideBar from '../SideBar'
-import ThemeContext from '../Context/ThemeContext'
 
 const NotFound = () => (
   <ThemeContext>

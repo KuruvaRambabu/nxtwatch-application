@@ -15,7 +15,7 @@ import {
 
 import './index.css'
 
-const TrendingVideoCard = props => {
+const VideoDetailsCard = props => {
   const {trendingVideo} = props
   const {
     thumbnailUrl,
@@ -27,7 +27,6 @@ const TrendingVideoCard = props => {
   } = trendingVideo
   const {name} = channel
   const formattedDistance = formatDistanceToNowStrict(new Date(publishedAt))
-  console.log(trendingVideo)
   return (
     <Link to={`/videos/${id}`} className="trending-videos-link">
       <TrendingVideoCardLi>
@@ -47,4 +46,4 @@ const TrendingVideoCard = props => {
   )
 }
 
-export default TrendingVideoCard
+export default VideoDetailsCard

@@ -3,6 +3,7 @@ import {
   TrendingVideoContaianer,
   TrendingVideosHeadingContainer,
   TrendingVideosIcon,
+  TrendingVideosUlElement,
 } from '../Trending/styledComponents'
 
 export const SavedVideosMainContainer = styled.div`
@@ -36,3 +37,4 @@ export const SavedVideosHeadingContainer = styled(
 export const SavedVideosIconContainer = styled(TrendingVideosIcon)``
 
 export const SavedVideosHeading = styled.h1``
+export const SavedVideoDetailsUlElement = styled(TrendingVideosUlElement)``

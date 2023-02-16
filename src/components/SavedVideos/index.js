@@ -1,5 +1,11 @@
-import {Component} from 'react'
+import {useContext} from 'react'
+
 import {AiFillFire} from 'react-icons/ai'
+import withHeader from '../Hocs/withHeader'
+import SideBar from '../SideBar'
+import NoVideosFound from '../NoVideosFound'
+import VideoDetailsCard from '../TrendingVideoCard'
+import ThemeContext from '../Context/ThemeContext'
 
 import {
   SavedVideosMainContainer,
@@ -9,40 +15,29 @@ import {
   SavedVideosIconContainer,
   SavedVideoUiContainer,
   SavedVideosHeading,
+  SavedVideoDetailsUlElement,
 } from './styledComponents'
 
-import withHeader from '../Hocs/withHeader'
-import SideBar from '../SideBar'
-import NoVideosFound from '../NoVideosFound'
-import {TrendingVideosUlElement} from '../Trending/styledComponents'
-import TrendingVideoCard from '../TrendingVideoCard'
-import ThemeContext from '../Context/ThemeContext'
+const SavedVideos = () => {
+  const themeContext = useContext(ThemeContext)
+  const {isDarkTheme, savedVideos} = themeContext
 
-class SavedVideos extends Component {
-  renderSavedVideos = savedVideos => {
+  const renderSavedVideos = () => {
     if (savedVideos.length > 0) {
       return (
-        <ThemeContext.Consumer>
-          {value => {
-            const {isDarkTheme} = value
-
-            return (
-              <SavedVideoUiContainer>
-                <SavedVideosHeadingContainer isDarkTheme={isDarkTheme}>
-                  <SavedVideosIconContainer isDarkTheme={isDarkTheme}>
-                    <AiFillFire className="trending-icon" />
-                  </SavedVideosIconContainer>
-                  <SavedVideosHeading>SavedVidoes</SavedVideosHeading>
-                </SavedVideosHeadingContainer>
-                <TrendingVideosUlElement>
-                  {savedVideos.map(trendingVideo => (
-                    <TrendingVideoCard trendingVideo={trendingVideo} />
-                  ))}
-                </TrendingVideosUlElement>
-              </SavedVideoUiContainer>
-            )
-          }}
-        </ThemeContext.Consumer>
+        <SavedVideoUiContainer>
+          <SavedVideosHeadingContainer isDarkTheme={isDarkTheme}>
+            <SavedVideosIconContainer isDarkTheme={isDarkTheme}>
+              <AiFillFire className="trending-icon" />
+            </SavedVideosIconContainer>
+            <SavedVideosHeading>SavedVidoes</SavedVideosHeading>
+          </SavedVideosHeadingContainer>
+          <SavedVideoDetailsUlElement>
+            {savedVideos.map(trendingVideo => (
+              <VideoDetailsCard trendingVideo={trendingVideo} />
+            ))}
+          </SavedVideoDetailsUlElement>
+        </SavedVideoUiContainer>
       )
     }
     return (
@@ -55,29 +50,19 @@ class SavedVideos extends Component {
     )
   }
 
-  render() {
-    return (
-      <ThemeContext.Consumer>
-        {value => {
-          const {savedVideos, isDarkTheme} = value
-          console.log('saved videos component', savedVideos)
-          return (
-            <SavedVideosMainContainer
-              data-test-id="savedVideos"
-              isDarkTheme={isDarkTheme}
-            >
-              <SideBarMainContainer isDarkTheme={isDarkTheme}>
-                <SideBar />
-              </SideBarMainContainer>
-              <NxtWatchRightSideSection isDarkTheme={isDarkTheme}>
-                {this.renderSavedVideos(savedVideos)}
-              </NxtWatchRightSideSection>
-            </SavedVideosMainContainer>
-          )
-        }}
-      </ThemeContext.Consumer>
-    )
-  }
+  return (
+    <SavedVideosMainContainer
+      data-test-id="savedVideos"
+      isDarkTheme={isDarkTheme}
+    >
+      <SideBarMainContainer isDarkTheme={isDarkTheme}>
+        <SideBar />
+      </SideBarMainContainer>
+      <NxtWatchRightSideSection isDarkTheme={isDarkTheme}>
+        {renderSavedVideos()}
+      </NxtWatchRightSideSection>
+    </SavedVideosMainContainer>
+  )
 }
 
 export default withHeader(SavedVideos)

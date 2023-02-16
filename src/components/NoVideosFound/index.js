@@ -1,3 +1,4 @@
+import ThemeContext from '../Context/ThemeContext'
 import {
   NoVideosFoundContainer,
   NoVideosImg,
@@ -5,7 +6,6 @@ import {
   NoResultsFoundDescription,
   RetryBtn,
 } from './styledComponents'
-import ThemeContext from '../Context/ThemeContext'
 
 const NoVideosFound = props => {
   const {getVideosAPI, imageLink, alt, heading, description} = props
