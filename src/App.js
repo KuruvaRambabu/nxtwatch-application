@@ -11,7 +11,7 @@ import Trending from './components/Trending'
 import Gaming from './components/Gaming'
 import SavedVideos from './components/SavedVideos'
 import WatchVideo from './components/WatchVideo'
-import SavedVideosContext from './components/Context/SavedVideosContext'
+import NotFound from './components/NotFound'
 
 // Replace your code here
 class App extends Component {
@@ -46,27 +46,19 @@ class App extends Component {
         value={{
           isDarkTheme,
           onChangeTheme: this.onChangeTheme,
+          onClickSaveVideo: this.onClickSaveVideo,
+          savedVideos,
         }}
       >
-        <SavedVideosContext.Provider
-          value={{
-            onClickSaveVideo: this.onClickSaveVideo,
-            savedVideos,
-          }}
-        >
-          <Switch>
-            <Route exact path="/login" component={Login} />
-            <ProtectedRoute exact path="/" component={Home} />
-            <ProtectedRoute exact path="/trending" component={Trending} />
-            <ProtectedRoute exact path="/gaming" component={Gaming} />
-            <ProtectedRoute
-              exact
-              path="/saved-videos"
-              component={SavedVideos}
-            />
-            <ProtectedRoute exact path="/videos/:id" component={WatchVideo} />
-          </Switch>
-        </SavedVideosContext.Provider>
+        <Switch>
+          <Route exact path="/login" component={Login} />
+          <ProtectedRoute exact path="/" component={Home} />
+          <ProtectedRoute exact path="/trending" component={Trending} />
+          <ProtectedRoute exact path="/gaming" component={Gaming} />
+          <ProtectedRoute exact path="/saved-videos" component={SavedVideos} />
+          <ProtectedRoute exact path="/videos/:id" component={WatchVideo} />
+          <Route component={NotFound} />
+        </Switch>
       </ThemeContext.Provider>
     )
   }

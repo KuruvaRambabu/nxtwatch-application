@@ -40,7 +40,7 @@ const Header = props => {
             </HeaderLiElements>
             <HeaderRightSection>
               <HeaderLiElements>
-                <ThemeChangeBtn onClick={onChangeTheme}>
+                <ThemeChangeBtn data-testid="theme" onClick={onChangeTheme}>
                   {isDarkTheme ? (
                     <BsBrightnessHigh className="lightTheme" />
                   ) : (

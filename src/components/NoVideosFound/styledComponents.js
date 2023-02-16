@@ -7,7 +7,9 @@ export const NoVideosFoundContainer = styled.div`
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  min-height: 80vh;
+  min-height: 90vh;
+  background-color: ${props => (props.isDarkTheme ? '#000000' : '#f9f9f9')};
+  color: ${props => (props.isDarkTheme ? '#ffffff' : '#313131')};
 `
 
 export const NoVideosImg = styled.img`
@@ -17,14 +19,15 @@ export const NoVideosImg = styled.img`
 export const NoResultsFoundDescription = styled.p``
 
 export const RetryBtn = styled.button`
-  border: 2px solid #3b82f6;
   width: 100px;
-  height: 30px;
+  height: 40px;
   border-radius: 5px;
   font-size: 14px;
   font-weight: bold;
   cursor: pointer;
   background-color: transparent;
   margin: 5px;
-  color: #3b82f6;
+  color: #ffffff;
+  border: none;
+  background-color: #4f46e5;
 `

@@ -19,6 +19,7 @@ import apiConstants from '../../constants/apiConstants'
 import LoadingView from '../LoadingView'
 import FailureView from '../FailureView'
 import GamingVideoCard from '../GamingVideoCard'
+import ThemeContext from '../Context/ThemeContext'
 
 class Gaming extends Component {
   state = {
@@ -75,19 +76,26 @@ class Gaming extends Component {
     const {gamingVideosList} = this.state
 
     return (
-      <GamingVidoesUIMainContainer>
-        <GamingVideosHeadingContainer>
-          <GamingVideoIconContainer>
-            <GiGamepad className="trending-icon" />
-          </GamingVideoIconContainer>
-          <GamingVideoHeading>Gaming</GamingVideoHeading>
-        </GamingVideosHeadingContainer>
-        <GamingVideoDisplayContainer>
-          {gamingVideosList.map(video => (
-            <GamingVideoCard gameVideo={video} key={video.id} />
-          ))}
-        </GamingVideoDisplayContainer>
-      </GamingVidoesUIMainContainer>
+      <ThemeContext.Consumer>
+        {value => {
+          const {isDarkTheme} = value
+          return (
+            <GamingVidoesUIMainContainer isDarkTheme={isDarkTheme}>
+              <GamingVideosHeadingContainer isDarkTheme={isDarkTheme}>
+                <GamingVideoIconContainer isDarkTheme={isDarkTheme}>
+                  <GiGamepad className="trending-icon" />
+                </GamingVideoIconContainer>
+                <GamingVideoHeading>Gaming</GamingVideoHeading>
+              </GamingVideosHeadingContainer>
+              <GamingVideoDisplayContainer>
+                {gamingVideosList.map(video => (
+                  <GamingVideoCard gameVideo={video} key={video.id} />
+                ))}
+              </GamingVideoDisplayContainer>
+            </GamingVidoesUIMainContainer>
+          )
+        }}
+      </ThemeContext.Consumer>
     )
   }
 
@@ -114,14 +122,24 @@ class Gaming extends Component {
 
   render() {
     return (
-      <GamingMainContainer>
-        <SideBarMainContainer>
-          <SideBar />
-        </SideBarMainContainer>
-        <NxtWatchRightSideSection>
-          {this.renderGamingVideosUI()}
-        </NxtWatchRightSideSection>
-      </GamingMainContainer>
+      <ThemeContext.Consumer>
+        {value => {
+          const {isDarkTheme} = value
+          return (
+            <GamingMainContainer
+              data-test-id="gaming"
+              isDarkTheme={isDarkTheme}
+            >
+              <SideBarMainContainer isDarkTheme={isDarkTheme}>
+                <SideBar />
+              </SideBarMainContainer>
+              <NxtWatchRightSideSection>
+                {this.renderGamingVideosUI()}
+              </NxtWatchRightSideSection>
+            </GamingMainContainer>
+          )
+        }}
+      </ThemeContext.Consumer>
     )
   }
 }

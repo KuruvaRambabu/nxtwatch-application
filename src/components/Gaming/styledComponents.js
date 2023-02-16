@@ -6,12 +6,13 @@ import {
   TrendingVideosHeadingContainer,
   TrendingVideosUlElement,
 } from '../Trending/styledComponents'
-import TrendingVideoCard from '../TrendingVideoCard'
 
 export const GamingMainContainer = styled.div`
   display: flex;
   justify-content: space-between;
   min-height: 90vh;
+  background-color: ${props => (props.isDarkTheme ? '#0f0f0f' : '#f9f9f9')};
+  color: ${props => (props.isDarkTheme ? '#ffffff' : '#313131')};
 `
 
 export const SideBarMainContainer = styled.div`

@@ -5,6 +5,8 @@ export const WatchVideoMainContainer = styled.div`
   justify-content: space-between;
   align-items: center;
   min-height: 90vh;
+  background-color: ${props => (props.isDarkTheme ? '#0f0f0f' : '#f9f9f9')};
+  color: ${props => (props.isDarkTheme ? '#ffffff' : '#313131')};
 `
 
 export const SideBarMainContainer = styled.div`
@@ -23,7 +25,9 @@ export const NxtWatchRightSideSection = styled.div`
   min-height: 90vh;
 `
 
-export const VideoPlayerContainer = styled.div``
+export const VideoPlayerContainer = styled.div`
+  margin: 30px;
+`
 export const LikesAndViewsContainer = styled.div`
   display: flex;
   justify-content: space-between;
@@ -62,7 +66,7 @@ export const CustomVideoPlayerBtn = styled.button`
   border: none;
   cursor: pointer;
   font-size: 18px;
-  color: ${props => (props.color ? '#00306e' : '')};
+  color: ${props => (props.color ? '#2563eb' : '#64748b')};
 `
 
 export const ChannelsDetailsContainer = styled.div`
@@ -76,7 +80,9 @@ export const ChannelLogo = styled.img`
   margin-top: 10px;
 `
 
-export const ChannelHeadingAndSubscribersContainer = styled.div``
+export const ChannelHeadingAndSubscribersContainer = styled.div`
+  margin-left: 20px;
+`
 
 export const ChannelName = styled.p``
 export const Subscribers = styled.p``

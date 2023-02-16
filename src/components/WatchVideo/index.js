@@ -4,6 +4,8 @@ import Cookies from 'js-cookie'
 import {AiOutlineLike, AiOutlineDislike} from 'react-icons/ai'
 import {CgPlayListAdd} from 'react-icons/cg'
 
+import {formatDistanceToNowStrict} from 'date-fns'
+
 import withHeader from '../Hocs/withHeader'
 import {
   SideBarMainContainer,
@@ -29,14 +31,13 @@ import VideoPlayer from '../VideoPlayer'
 import apiConstants from '../../constants/apiConstants'
 import LoadingView from '../LoadingView'
 import './index.css'
-import SavedVideosContext from '../Context/SavedVideosContext'
+import ThemeContext from '../Context/ThemeContext'
 
 class WatchVideo extends Component {
   state = {
     apiStatus: apiConstants.initial,
     videoDetails: {},
     isSavedVideo: false,
-    savedVideosList: [],
     isLikedVideo: false,
     isUnlikedVideo: false,
   }
@@ -143,27 +144,29 @@ class WatchVideo extends Component {
       videoUrl,
       title,
       publishedAt,
-      id,
       viewCount,
       description,
       channel,
     } = videoDetails
     const {name, profileImgUrl, subscriberCount} = channel
+    const formattedDistance = formatDistanceToNowStrict(new Date(publishedAt))
+
     return (
-      <SavedVideosContext.Consumer>
+      <ThemeContext.Consumer>
         {value => {
-          const {savedVideos, onClickSaveVideo} = value
+          const {onClickSaveVideo} = value
           const onClickSave = () => {
             onClickSaveVideo(videoDetails)
             this.addVideoToSavedList()
           }
+
           return (
             <VideoPlayerContainer>
               <VideoPlayer url={videoUrl} title={title} />
               <LikesAndViewsContainer>
                 <ViewsAndPublishedAtContainer>
                   <ViewsCount>{viewCount}</ViewsCount>
-                  <PublishedAt>{publishedAt}</PublishedAt>
+                  <PublishedAt>{formattedDistance} ago</PublishedAt>
                 </ViewsAndPublishedAtContainer>
                 <LikesAndSaveVideoContainer>
                   <CustomVideoPlayerBtn
@@ -187,7 +190,7 @@ class WatchVideo extends Component {
                     type="button"
                   >
                     <CgPlayListAdd className="save-icon" />
-                    Save
+                    {isSavedVideo ? 'Saved' : 'Save'}
                   </CustomVideoPlayerBtn>
                 </LikesAndSaveVideoContainer>
               </LikesAndViewsContainer>
@@ -203,7 +206,7 @@ class WatchVideo extends Component {
             </VideoPlayerContainer>
           )
         }}
-      </SavedVideosContext.Consumer>
+      </ThemeContext.Consumer>
     )
   }
 
@@ -226,14 +229,25 @@ class WatchVideo extends Component {
 
   render() {
     return (
-      <WatchVideoMainContainer>
-        <SideBarMainContainer>
-          <SideBar />
-        </SideBarMainContainer>
-        <NxtWatchRightSideSection>
-          {this.renderVideoPlayer()}
-        </NxtWatchRightSideSection>
-      </WatchVideoMainContainer>
+      <ThemeContext.Consumer>
+        {value => {
+          const {isDarkTheme} = value
+
+          return (
+            <WatchVideoMainContainer
+              isDarkTheme={isDarkTheme}
+              data-testid="videoItemDetails"
+            >
+              <SideBarMainContainer isDarkTheme={isDarkTheme}>
+                <SideBar />
+              </SideBarMainContainer>
+              <NxtWatchRightSideSection isDarkTheme={isDarkTheme}>
+                {this.renderVideoPlayer()}
+              </NxtWatchRightSideSection>
+            </WatchVideoMainContainer>
+          )
+        }}
+      </ThemeContext.Consumer>
     )
   }
 }

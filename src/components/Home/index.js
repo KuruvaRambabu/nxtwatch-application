@@ -1,5 +1,4 @@
 import {Component} from 'react'
-import Loader from 'react-loader-spinner'
 import Cookies from 'js-cookie'
 import {BsSearch} from 'react-icons/bs'
 
@@ -14,7 +13,6 @@ import {
   InputSearchField,
   SearchIconBtn,
   VideosContainer,
-  LoaderContainer,
 } from './styledComponents'
 
 import withHeader from '../Hocs/withHeader'
@@ -41,7 +39,6 @@ class Home extends Component {
 
   onVideosAPISuccess = data => {
     const {videos} = data
-    console.log(videos)
     const formattedVideosData = videos.map(video => ({
       id: video.id,
       title: video.title,
@@ -166,7 +163,7 @@ class Home extends Component {
         {value => {
           const {isDarkTheme} = value
           return (
-            <HomeMainContainer isDarkTheme={isDarkTheme}>
+            <HomeMainContainer data-testid="home" isDarkTheme={isDarkTheme}>
               <SideBarMainContainer isDarkTheme={isDarkTheme}>
                 <SideBar />
               </SideBarMainContainer>

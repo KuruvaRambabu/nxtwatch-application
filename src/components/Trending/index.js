@@ -24,6 +24,7 @@ import LoadingView from '../LoadingView'
 import FailureView from '../FailureView'
 import NoVideosFound from '../NoVideosFound'
 import TrendingVideoCard from '../TrendingVideoCard'
+import ThemeContext from '../Context/ThemeContext'
 
 class Trending extends Component {
   state = {
@@ -87,19 +88,27 @@ class Trending extends Component {
 
     if (trendingVideosList.length > 0) {
       return (
-        <TrendingVideoContaianer>
-          <TrendingVideosHeadingContainer>
-            <TrendingVideosIcon>
-              <AiFillFire className="trending-icon" />
-            </TrendingVideosIcon>
-            <TrendingVideoHeading>Trending</TrendingVideoHeading>
-          </TrendingVideosHeadingContainer>
-          <TrendingVideosUlElement>
-            {trendingVideosList.map(trendingVideo => (
-              <TrendingVideoCard trendingVideo={trendingVideo} />
-            ))}
-          </TrendingVideosUlElement>
-        </TrendingVideoContaianer>
+        <ThemeContext.Consumer>
+          {value => {
+            const {isDarkTheme} = value
+
+            return (
+              <TrendingVideoContaianer>
+                <TrendingVideosHeadingContainer isDarkTheme={isDarkTheme}>
+                  <TrendingVideosIcon isDarkTheme={isDarkTheme}>
+                    <AiFillFire className="trending-icon" />
+                  </TrendingVideosIcon>
+                  <TrendingVideoHeading>Trending</TrendingVideoHeading>
+                </TrendingVideosHeadingContainer>
+                <TrendingVideosUlElement isDarkTheme={isDarkTheme}>
+                  {trendingVideosList.map(trendingVideo => (
+                    <TrendingVideoCard trendingVideo={trendingVideo} />
+                  ))}
+                </TrendingVideosUlElement>
+              </TrendingVideoContaianer>
+            )
+          }}
+        </ThemeContext.Consumer>
       )
     }
     return <NoVideosFound />
@@ -128,14 +137,27 @@ class Trending extends Component {
 
   render() {
     return (
-      <TrendingMainContainer>
-        <SideBarMainContainer>
-          <SideBar />
-        </SideBarMainContainer>
-        <TrendingRightSideSection>
-          <Container>{this.renderTrendingVideos()}</Container>
-        </TrendingRightSideSection>
-      </TrendingMainContainer>
+      <ThemeContext.Consumer>
+        {value => {
+          const {isDarkTheme} = value
+
+          return (
+            <TrendingMainContainer
+              data-testid="trending"
+              isDarkTheme={isDarkTheme}
+            >
+              <SideBarMainContainer isDarkTheme={isDarkTheme}>
+                <SideBar />
+              </SideBarMainContainer>
+              <TrendingRightSideSection>
+                <Container isDarkTheme={isDarkTheme}>
+                  {this.renderTrendingVideos()}
+                </Container>
+              </TrendingRightSideSection>
+            </TrendingMainContainer>
+          )
+        }}
+      </ThemeContext.Consumer>
     )
   }
 }

@@ -1,4 +1,6 @@
 import {Link} from 'react-router-dom'
+import {formatDistanceToNowStrict} from 'date-fns'
+
 import {
   TrendingVideoCardLi,
   TrendingVideoThumbnailImg,
@@ -24,6 +26,7 @@ const TrendingVideoCard = props => {
     title,
   } = trendingVideo
   const {name} = channel
+  const formattedDistance = formatDistanceToNowStrict(new Date(publishedAt))
   console.log(trendingVideo)
   return (
     <Link to={`/videos/${id}`} className="trending-videos-link">
@@ -36,7 +39,7 @@ const TrendingVideoCard = props => {
           <ChannelName>{name}</ChannelName>
           <PublishedAndViewsCountContainer>
             <ViewsCount>{viewCount} views</ViewsCount>
-            <PublishedAt>{publishedAt}</PublishedAt>
+            <PublishedAt>{formattedDistance} ago</PublishedAt>
           </PublishedAndViewsCountContainer>
         </TrendingVideoDetailsContainer>
       </TrendingVideoCardLi>

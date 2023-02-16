@@ -165,22 +165,20 @@ class Login extends Component {
       <ThemeContext.Consumer>
         {value => {
           const {isDarkTheme} = value
+          const websiteLogoUrl = isDarkTheme
+            ? 'https://assets.ccbp.in/frontend/react-js/nxt-watch-logo-dark-theme-img.png'
+            : 'https://assets.ccbp.in/frontend/react-js/nxt-watch-logo-light-theme-img.png'
           return (
             <LoginContainer isDarkTheme={isDarkTheme}>
               <LoginFormContainer isDarkTheme={isDarkTheme}>
                 <WebsiteLogoContainer>
-                  <FormLogo
-                    src="https://assets.ccbp.in/frontend/react-js/nxt-watch-logo-light-theme-img.png"
-                    alt="website logo"
-                  />
+                  <FormLogo src={websiteLogoUrl} alt="website logo" />
                 </WebsiteLogoContainer>
                 <Form onSubmit={this.onSubmitForm}>
                   {this.renderUsernameInput()}
                   {this.renderPasswordInput()}
                   {this.renderShowPasswordCheckbox()}
-                  {showSubmitError && (
-                    <ErrorMessage>{errorMessage}</ErrorMessage>
-                  )}
+
                   {isLoading ? (
                     <LoaderContainer data-testid="loader">
                       <Loader
@@ -194,6 +192,9 @@ class Login extends Component {
                     <LoginBtn className="login-button" type="submit">
                       Login
                     </LoginBtn>
+                  )}
+                  {showSubmitError && (
+                    <ErrorMessage>*{errorMessage}</ErrorMessage>
                   )}
                 </Form>
               </LoginFormContainer>

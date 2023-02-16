@@ -1,4 +1,5 @@
 import {Link} from 'react-router-dom'
+import {formatDistanceToNowStrict} from 'date-fns'
 
 import './index.css'
 
@@ -15,18 +16,19 @@ import {
   VideoViews,
   SpanEl,
 } from './styledComponents'
-import SavedVideosContext from '../Context/SavedVideosContext'
 
 const VideoCard = props => {
   const {video} = props
   const {id, thumbnailUrl, title, viewCount, publishedAt, channel} = video
   const {name, profileImageUrl} = channel
+  const formattedDistance = formatDistanceToNowStrict(new Date(publishedAt))
+
   return (
     <Link to={`/videos/${id}`} className="videos-link">
       <VideoCardLi>
-        <VideoThumbnailImg src={thumbnailUrl} alt="thumbnail" />
+        <VideoThumbnailImg src={thumbnailUrl} alt="video thumbnail" />
         <VideoContentContainer>
-          <VideoChannelLogo src={profileImageUrl} alt="logo" />
+          <VideoChannelLogo src={profileImageUrl} alt="channel logo" />
           <VideoDetailsContainer>
             <VideoHeading>{title}</VideoHeading>
             <VideoChannel>{name}</VideoChannel>
@@ -34,7 +36,7 @@ const VideoCard = props => {
               <VideoViews>{viewCount} Views</VideoViews>
               <PublishedOn>
                 <SpanEl>.</SpanEl>
-                {publishedAt}
+                {formattedDistance} ago
               </PublishedOn>
             </VideoViewsAndPublishedContainer>
           </VideoDetailsContainer>

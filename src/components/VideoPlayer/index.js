@@ -2,7 +2,6 @@ import ReactPlayer from 'react-player'
 
 import './index.css'
 import {VideoContainer, VideoHeading} from './styledComponents'
-import SavedVideosContext from '../Context/SavedVideosContext'
 
 const VideoPlayer = props => {
   const {url, title} = props

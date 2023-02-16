@@ -5,7 +5,8 @@ export const SideBarContainer = styled.div`
   justify-content: space-between;
   align-items: flex-start;
   flex-direction: column;
-  height: 89vh;
+  height: 90vh;
+  color: ${props => (props.isDarkTheme ? '#ffffff' : '#000000')};
 `
 
 export const SideBarTopSection = styled.div`
@@ -39,6 +40,7 @@ export const NavItemHeading = styled.p`
   width: 70%;
   text-align: left;
   pointer-events: none;
+  font-weight: ${props => (props.isActive ? 'bold' : '')};
 `
 export const ContactUsHeading = styled.h1`
   padding-left: 20px;
@@ -60,4 +62,7 @@ export const SideBarDescription = styled.p`
   font-size: 18px;
   font-weight: 400;
   width: 75%;
+`
+export const IconContainer = styled.div`
+  color: ${props => (props.isActive ? '#ff0000' : '#000000')};
 `
