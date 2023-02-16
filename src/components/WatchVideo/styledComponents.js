@@ -66,7 +66,7 @@ export const CustomVideoPlayerBtn = styled.button`
   border: none;
   cursor: pointer;
   font-size: 18px;
-  color: ${props => (props.color ? '#2563eb' : '#64748b')};
+  color: ${props => (props.isActive ? '#2563eb' : '#64748b')};
 `
 
 export const ChannelsDetailsContainer = styled.div`

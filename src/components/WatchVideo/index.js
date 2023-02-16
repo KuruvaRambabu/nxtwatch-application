@@ -142,13 +142,14 @@ const WatchVideo = () => {
       viewCount,
       description,
       channel,
+      id,
     } = videoDetails
     const {name, profileImgUrl, subscriberCount} = channel
     const formattedDistance = formatDistanceToNowStrict(new Date(publishedAt))
 
     return (
       <VideoPlayerContainer>
-        <VideoPlayer url={videoUrl} title={title} />
+        <VideoPlayer key={id} url={videoUrl} title={title} />
         <LikesAndViewsContainer>
           <ViewsAndPublishedAtContainer>
             <ViewsCount>{viewCount}</ViewsCount>
