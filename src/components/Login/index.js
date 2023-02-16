@@ -1,5 +1,5 @@
-import {Component} from 'react'
-import {withRouter, Redirect} from 'react-router-dom'
+import {useState} from 'react'
+import {withRouter, Redirect, useHistory} from 'react-router-dom'
 import Loader from 'react-loader-spinner'
 import Cookies from 'js-cookie'
 
@@ -21,50 +21,85 @@ import {
   ShowPasswordLabel,
 } from './styledComponents'
 
-class Login extends Component {
-  state = {
-    username: '',
-    password: '',
-    isLoading: false,
-    showSubmitError: false,
-    errorMessage: '',
-    usernameErroMsg: '',
-    passwordErroMsg: '',
-    showPassword: false,
+const Login = () => {
+  //   state = {
+  //     username: '',
+  //     password: '',
+  //     isLoading: false,
+  //     showSubmitError: false,
+  //     errorMessage: '',
+  //     usernameErroMsg: '',
+  //     passwordErroMsg: '',
+  //     showPassword: false,
+  //   }
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [isLoading, setLoadingStatus] = useState(false)
+  const [showSubmitError, setSubmitError] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [errorMessage, setErroMessage] = useState('')
+  const history = useHistory()
+
+  const onChangeUsername = event => {
+    setUsername(event.target.value)
   }
 
-  onChangeUsername = event => {
-    this.setState({username: event.target.value})
+  const onChangePassword = event => {
+    setPassword(event.target.value)
   }
 
-  renderUsernameInput = () => {
-    const {username, usernameErroMsg} = this.state
-    const showBorder = usernameErroMsg !== ''
-    console.log(showBorder)
-    return (
-      <>
-        <InputLabel htmlFor="username">USERNAME</InputLabel>
-        <Input
-          type="text"
-          id="username"
-          value={username}
-          placeholder="Username"
-          onChange={this.onChangeUsername}
-          showBorder={showBorder}
-        />
-        {usernameErroMsg && <ErrorMessage>*{usernameErroMsg}</ErrorMessage>}
-      </>
-    )
+  const onClickShowPassword = () => {
+    setShowPassword(prevState => !prevState)
   }
 
-  onChangePassword = event => {
-    this.setState({password: event.target.value})
+  const onSubmitSuccess = jwtToken => {
+    Cookies.set('jwt_token', jwtToken, {
+      expires: 30,
+      path: '/',
+    })
+    history.replace('/')
   }
 
-  renderPasswordInput = () => {
-    const {password, showPassword, passwordErroMsg} = this.state
+  const onSubmitFailure = errorMsg => {
+    setLoadingStatus(false)
+    setSubmitError(true)
+    setErroMessage(errorMsg)
+  }
+
+  const onSubmitForm = async event => {
+    event.preventDefault()
+    setLoadingStatus(true)
+    const userDetails = {username, password}
+    const url = 'https://apis.ccbp.in/login'
+    const options = {
+      method: 'POST',
+      body: JSON.stringify(userDetails),
+    }
+
+    const response = await fetch(url, options)
+    const data = await response.json()
+    if (response.ok === true) {
+      onSubmitSuccess(data.jwt_token)
+    } else {
+      onSubmitFailure(data.error_msg)
+    }
+  }
+
+  const renderUsernameInput = () => (
+    <>
+      <InputLabel htmlFor="username">USERNAME</InputLabel>
+      <Input
+        type="text"
+        id="username"
+        value={username}
+        placeholder="Username"
+        onChange={onChangeUsername}
+      />
+    </>
+  )
+
+  const renderPasswordInput = () => {
     const type = showPassword ? 'text' : 'password'
-    const showBorder = passwordErroMsg !== ''
 
     return (
       <>
@@ -74,136 +109,73 @@ class Login extends Component {
           id="password"
           value={password}
           placeholder="Password"
-          onChange={this.onChangePassword}
-          showBorder={showBorder}
+          onChange={onChangePassword}
         />
-        {passwordErroMsg && <ErrorMessage>*{passwordErroMsg}</ErrorMessage>}
       </>
     )
   }
 
-  onSubmitSuccess = jwtToken => {
-    const {history} = this.props
+  const renderShowPasswordCheckbox = () => (
+    <ShowPasswordContainer>
+      <ShowPasswordCheckbox
+        type="checkbox"
+        id="showPassword"
+        isChecked={showPassword}
+        onChange={onClickShowPassword}
+      />
+      <ShowPasswordLabel htmlFor="showPassword">
+        Show Password
+      </ShowPasswordLabel>
+    </ShowPasswordContainer>
+  )
 
-    Cookies.set('jwt_token', jwtToken, {
-      expires: 30,
-      path: '/',
-    })
-    history.replace('/')
+  const jwtToken = Cookies.get('jwt_token')
+  if (jwtToken !== undefined) {
+    return <Redirect to="/" />
   }
 
-  onSubmitFailure = errorMsg => {
-    this.setState({
-      errorMessage: errorMsg,
-      showSubmitError: true,
-      isLoading: false,
-    })
-  }
+  return (
+    <ThemeContext.Consumer>
+      {value => {
+        const {isDarkTheme} = value
+        const websiteLogoUrl = isDarkTheme
+          ? 'https://assets.ccbp.in/frontend/react-js/nxt-watch-logo-dark-theme-img.png'
+          : 'https://assets.ccbp.in/frontend/react-js/nxt-watch-logo-light-theme-img.png'
+        return (
+          <LoginContainer isDarkTheme={isDarkTheme}>
+            <LoginFormContainer isDarkTheme={isDarkTheme}>
+              <WebsiteLogoContainer>
+                <FormLogo src={websiteLogoUrl} alt="website logo" />
+              </WebsiteLogoContainer>
+              <Form onSubmit={onSubmitForm}>
+                {renderUsernameInput()}
+                {renderPasswordInput()}
+                {renderShowPasswordCheckbox()}
 
-  onSubmitForm = async event => {
-    event.preventDefault()
-    const {username, password} = this.state
-    console.log('hello')
-    if (username === '' && password === '') {
-      this.setState({usernameErroMsg: 'Required', passwordErroMsg: 'Required'})
-    } else if (username === '') {
-      this.setState({usernameErroMsg: 'Required'})
-    } else if (password === '') {
-      this.setState({passwordErroMsg: 'Required'})
-    } else {
-      this.setState({
-        isLoading: true,
-        usernameErroMsg: '',
-        passwordErroMsg: '',
-      })
-      const userDetails = {username, password}
-      const url = 'https://apis.ccbp.in/login'
-      const options = {
-        method: 'POST',
-        body: JSON.stringify(userDetails),
-      }
-
-      const response = await fetch(url, options)
-      const data = await response.json()
-      if (response.ok === true) {
-        this.onSubmitSuccess(data.jwt_token)
-      } else {
-        this.onSubmitFailure(data.error_msg)
-      }
-    }
-  }
-
-  onClickShowPassword = () => {
-    this.setState(prevState => ({showPassword: !prevState.showPassword}))
-  }
-
-  renderShowPasswordCheckbox = () => {
-    const {showPassword} = this.state
-    return (
-      <ShowPasswordContainer>
-        <ShowPasswordCheckbox
-          type="checkbox"
-          id="showPassword"
-          isChecked={showPassword}
-          onChange={this.onClickShowPassword}
-        />
-        <ShowPasswordLabel htmlFor="showPassword">
-          Show Password
-        </ShowPasswordLabel>
-      </ShowPasswordContainer>
-    )
-  }
-
-  render() {
-    const {errorMessage, showSubmitError, isLoading} = this.state
-    const jwtToken = Cookies.get('jwt_token')
-    if (jwtToken !== undefined) {
-      return <Redirect to="/" />
-    }
-
-    return (
-      <ThemeContext.Consumer>
-        {value => {
-          const {isDarkTheme} = value
-          const websiteLogoUrl = isDarkTheme
-            ? 'https://assets.ccbp.in/frontend/react-js/nxt-watch-logo-dark-theme-img.png'
-            : 'https://assets.ccbp.in/frontend/react-js/nxt-watch-logo-light-theme-img.png'
-          return (
-            <LoginContainer isDarkTheme={isDarkTheme}>
-              <LoginFormContainer isDarkTheme={isDarkTheme}>
-                <WebsiteLogoContainer>
-                  <FormLogo src={websiteLogoUrl} alt="website logo" />
-                </WebsiteLogoContainer>
-                <Form onSubmit={this.onSubmitForm}>
-                  {this.renderUsernameInput()}
-                  {this.renderPasswordInput()}
-                  {this.renderShowPasswordCheckbox()}
-
-                  {isLoading ? (
-                    <LoaderContainer data-testid="loader">
-                      <Loader
-                        type="Oval"
-                        color="#ffffff"
-                        height="30"
-                        width="50"
-                      />
-                    </LoaderContainer>
-                  ) : (
-                    <LoginBtn className="login-button" type="submit">
-                      Login
-                    </LoginBtn>
-                  )}
-                  {showSubmitError && (
-                    <ErrorMessage>*{errorMessage}</ErrorMessage>
-                  )}
-                </Form>
-              </LoginFormContainer>
-            </LoginContainer>
-          )
-        }}
-      </ThemeContext.Consumer>
-    )
-  }
+                {isLoading ? (
+                  <LoaderContainer data-testid="loader">
+                    <Loader
+                      type="Oval"
+                      color="#ffffff"
+                      height="30"
+                      width="50"
+                    />
+                  </LoaderContainer>
+                ) : (
+                  <LoginBtn className="login-button" type="submit">
+                    Login
+                  </LoginBtn>
+                )}
+                {showSubmitError && (
+                  <ErrorMessage>*{errorMessage}</ErrorMessage>
+                )}
+              </Form>
+            </LoginFormContainer>
+          </LoginContainer>
+        )
+      }}
+    </ThemeContext.Consumer>
+  )
 }
 
 export default withRouter(Login)

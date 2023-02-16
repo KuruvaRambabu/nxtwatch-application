@@ -23,13 +23,6 @@ import {
 } from './styledComponents'
 import './index.css'
 
-// const navItems = [
-//   {id: 'home', name: 'Home'},
-//   {id: 'trending', name: 'Trending'},
-//   {id: 'gaming', name: 'Gaming'},
-//   {id: 'savedVideos', name: 'Saved Videos'},
-// ]
-
 class SideBar extends Component {
   state = {
     activeRoute: Cookies.get('active_route'),
